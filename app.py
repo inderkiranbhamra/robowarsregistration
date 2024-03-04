@@ -13,8 +13,8 @@ CORS(app)  # Enable CORS for your Flask app
 app.secret_key = 'inderkiran@24'
 
 # Email configuration
-sender_email = 'inderkiran20233@gmail.com'  # replace with your email
-app_password = 'krhu cexv lyue dmnz'  # replace with your generated app password
+sender_email = 'hackoverflow@cumail.in'  # replace with your email
+app_password = 'lgde lflp hmgu krrd'  # replace with your generated app password
 
 # Google Sheets configuration
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
