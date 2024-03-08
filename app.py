@@ -52,7 +52,7 @@ def generate_auth_link(token, team_name, college_name, leader_name, leader_conta
         name = member['name'].replace(' ', '_')
         contact = member['contact'].replace(' ', '_')
         email = member['email'].replace(' ', '_')
-        auth_link += f'&member{i}_name={name}&member{i}_contact={contact}&member{i}_email={email}'
+        auth_link += f'&p{i}_name={name}&p{i}_contact={contact}&p{i}_email={email}'
 
     return auth_link
 
@@ -72,9 +72,9 @@ def send_email():
         # Extract details of other members
         member_details = []
         for i in range(1, 5):  # Assuming there are up to 4 team members
-            member_name = data.get(f'member{i}_name')
-            member_contact = data.get(f'member{i}_contact')
-            member_email = data.get(f'member{i}_email')
+            member_name = data.get(f'p{i}_name')
+            member_contact = data.get(f'p{i}_contact')
+            member_email = data.get(f'p{i}_email')
             if member_name and member_contact and member_email:
                 member_details.append({
                     'name': member_name,
@@ -142,9 +142,9 @@ def verify(token):
 
                 # Extract member details
                 for i in range(1, 5):  # Assuming there are up to 4 team members
-                    member_name = request.args.get(f'member{i}_name')
-                    member_contact = request.args.get(f'member{i}_contact')
-                    member_email = request.args.get(f'member{i}_email')
+                    member_name = request.args.get(f'p{i}_name')
+                    member_contact = request.args.get(f'p{i}_contact')
+                    member_email = request.args.get(f'p{i}_email')
                     if member_name and member_contact and member_email:
                         new_row.extend([member_name, member_contact, member_email])
                     else:
