@@ -71,7 +71,7 @@ def send_email():
 
         # Extract details of other members
         member_details = []
-        for i in range(1, 5):  # Assuming there are up to 4 team members
+        for i in range(2, 6):  # Assuming there are up to 4 team members
             member_name = data.get(f'p{i}_name')
             member_contact = data.get(f'p{i}_contact')
             member_email = data.get(f'p{i}_email')
@@ -141,7 +141,7 @@ def verify(token):
                 new_row = [team_name, college_name, leader_name, leader_contact, leader_email, robot_drive]
 
                 # Extract member details
-                for i in range(1, 5):  # Assuming there are up to 4 team members
+                for i in range(2, 6):  # Assuming there are up to 4 team members
                     member_name = request.args.get(f'p{i}_name')
                     member_contact = request.args.get(f'p{i}_contact')
                     member_email = request.args.get(f'p{i}_email')
