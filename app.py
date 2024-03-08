@@ -61,19 +61,20 @@ def generate_auth_link(token, team_name, college_name, leader_name, leader_conta
 @app.route('/submit', methods=['POST'])
 def send_email():
     if request.method == 'POST':
-        team_name = request.form.get('team_name')
-        college_name = request.form.get('college_name')
-        leader_name = request.form.get('leader_name')
-        leader_contact = request.form.get('leader_contact')
-        leader_email = request.form.get('leader_email')
-        robot_drive = request.form.get('robot_drive')
+        data = request.json
+        team_name = data.get('team_name')
+        college_name = data.get('college_name')
+        leader_name = data.get('leader_name')
+        leader_contact = data.get('leader_contact')
+        leader_email = data.get('leader_email')
+        robot_drive = data.get('robot_drive')
 
         # Extract details of other members
         member_details = []
         for i in range(1, 5):  # Assuming there are up to 4 team members
-            member_name = request.form.get(f'member{i}_name')
-            member_contact = request.form.get(f'member{i}_contact')
-            member_email = request.form.get(f'member{i}_email')
+            member_name = data.get(f'member{i}_name')
+            member_contact = data.get(f'member{i}_contact')
+            member_email = data.get(f'member{i}_email')
             if member_name and member_contact and member_email:
                 member_details.append({
                     'name': member_name,
