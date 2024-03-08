@@ -48,7 +48,7 @@ def generate_auth_link(token, team_name, college_name, leader_name, leader_conta
     auth_link = f'https://robowarsregistration.vercel.app/verify/{token}?team_name={team_name}&college_name={college_name}&leader_name={leader_name}&leader_contact={leader_contact}&leader_email={leader_email}&robot_drive={robot_drive}'
 
     # Append member details to the authentication link
-    for i, member in enumerate(member_details, start=1):
+    for i, member in enumerate(member_details, start=2):
         name = member['name'].replace(' ', '_')
         contact = member['contact'].replace(' ', '_')
         email = member['email'].replace(' ', '_')
