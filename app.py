@@ -78,7 +78,7 @@ def check_duplicate_ign(data):
     conn = mysql.connector.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
     cursor = conn.cursor()
     ign_set = set()
-    igns = [data['team_name'], data['leader_contact'], data['leader_email'], data['robot_drive'], ['p2_contact'], data['p2_email'], data['p3_contact'], data['p3_email'], data['p4_contact'], data['p4_email'], data['p5_contact'], data['p5_email']]
+    igns = [data['team_name'], data['leader_contact'], data['leader_email'], data['robot_drive'], data['p2_contact'], data['p2_email'], data['p3_contact'], data['p3_email'], data['p4_contact'], data['p4_email'], data['p5_contact'], data['p5_email']]
     field_names = ['Team Name', 'Leader Contact', 'Leader Email', 'Robot Drive', 'P2 Contact', 'P2 Email', 'P3 Contact', 'P3 Email', 'P4 Contact', 'P4 Email', 'P5 Contact', 'P5 Email']
     duplicate_fields = []
 
@@ -184,3 +184,4 @@ def verify(token):
             return jsonify({'message': error_message}), 500
     else:
         return jsonify({'message': 'Invalid or expired verification link.'}), 400
+
