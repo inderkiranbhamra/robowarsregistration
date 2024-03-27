@@ -1,165 +1,222 @@
-from flask import Flask, request, jsonify, redirect, url_for, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import yagmail
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import mysql.connector
 import secrets
-import os
+from urllib.parse import urlencode
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for your Flask app
+CORS(app)
 
-# Set the secret key for the session
 app.secret_key = 'inderkiran@24'
 
+# MySQL database configuration
+DB_HOST = '217.21.94.103'
+DB_NAME = 'u813060526_robowars'
+DB_USER = 'u813060526_robowars'
+DB_PASSWORD = '135@Hack'
+
+# Connect to the MySQL database
+conn = mysql.connector.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+cursor = conn.cursor()
+
+cursor.execute("CREATE TABLE IF NOT EXISTS UniqueIGN (ign VARCHAR(255) UNIQUE)")
+conn.commit()
+# cursor.execute("DROP TABLE IF EXISTS UniqueIGN")
+# conn.commit()
+cursor.execute('''CREATE TABLE IF NOT EXISTS Robowarsregistrations (
+    team_name VARCHAR(255) PRIMARY KEY,
+    college_name VARCHAR(255),
+    leader_name VARCHAR(255),
+    leader_contact VARCHAR(255) UNIQUE,
+    leader_email VARCHAR(255) UNIQUE,
+    robot_drive VARCHAR(255) UNIQUE,
+    p2_name VARCHAR(255),
+    p2_contact VARCHAR(255) UNIQUE,
+    p2_email VARCHAR(255) UNIQUE,
+    p3_name VARCHAR(255),
+    p3_contact VARCHAR(255) UNIQUE,
+    p3_email VARCHAR(255) UNIQUE,
+    p4_name VARCHAR(255),
+    p4_contact VARCHAR(255) UNIQUE,
+    p4_email VARCHAR(255) UNIQUE,
+    p5_name VARCHAR(255),
+    p5_contact VARCHAR(255) UNIQUE,
+    p5_email VARCHAR(255) UNIQUE
+);
+''')
+conn.commit()
+
 # Email configuration
-sender_email = 'hackoverflow@cumail.in'  # replace with your email
-app_password = 'lgde lflp hmgu krrd'  # replace with your generated app password
+sender_email = 'hackoverflow@cumail.in'
+app_password = 'lgde lflp hmgu krrd'
 
-# Google Sheets configuration
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name('bgmi-registration-e1d0ccd3b338.json', scope)
-gc = gspread.authorize(credentials)
-spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Y02mNph9lvPE-LmoJ2Ks6BZ4T84_HPF-O1toDIqYe3w/edit#gid=0'
-sh = gc.open_by_url(spreadsheet_url)
-worksheet = sh.get_worksheet(1)  # Accessing the second sheet (index 1)
-
-# Dictionary to store email verification tokens
 email_tokens = {}
 
 
-# Function to generate a random token
 def generate_token():
     return secrets.token_hex(16)
 
 
-# Function to generate an authentication link with token
-def generate_auth_link(token, team_name, college_name, leader_name, leader_contact, leader_email, robot_drive,
-                       member_details):
-    # Replace spaces with underscores in each parameter
-    team_name = team_name.replace(' ', '_')
-    college_name = college_name.replace(' ', '_')
-    leader_name = leader_name.replace(' ', '_')
-    leader_contact = leader_contact.replace(' ', '_')  # Added space
-    leader_email = leader_email.replace(' ', '_')  # Added space
-    robot_drive = robot_drive.replace(' ', '_')  # Added space
-
-    # Construct the authentication link with modified parameters
-    auth_link = f'https://robowarsregistration.vercel.app/verify/{token}?team_name={team_name}&college_name={college_name}&leader_name={leader_name}&leader_contact={leader_contact}&leader_email={leader_email}&robot_drive={robot_drive}'
-
-    # Append member details to the authentication link
-    for i, member in enumerate(member_details, start=2):
-        name = member['name'].replace(' ', '_')
-        contact = member['contact'].replace(' ', '_')
-        email = member['email'].replace(' ', '_')
-        auth_link += f'&p{i}_name={name}&p{i}_contact={contact}&p{i}_email={email}'
-
+def generate_auth_link(token, data):
+    auth_link = f'https://robowarsregistration.vercel.app/verify/{token}?'
+    auth_link += urlencode(data)
     return auth_link
 
+#
+# def check_duplicate_email(data):
+#     email_set = set()
+#     emails = [data['leader_email'], data['p2_email'], data['p3_email'], data['p4_email']]
+#     for email in emails:
+#         if email in email_set:
+#             print("Duplicate email detected:", email)
+#             return True
+#         else:
+#             email_set.add(email)
+#
+#     for email in emails:
+#         cursor.execute("SELECT * FROM UniqueEmails2 WHERE email = %s", (email,))
+#         result = cursor.fetchone()
+#         if result:
+#             print("Duplicate email detected:", email)
+#             return True
+#
+#     return False
 
-# Route to handle form submission and send authentication email
+
+# def check_duplicate_ign(data):
+#     ign_set = set()
+#     igns = [data['team_name'], data['leader_ign'], data['leader_game_id'], data['leader_id_no'], data['leader_contact'], data['leader_email'], data['p2_ign'], data['p2_game_id'], data['p2_id_no'], data['p2_contact'], data['p3_ign'], data['p3_game_id'], data['p3_id_no'], data['p3_contact'], data['p4_ign'], data['p4_game_id'], data['p4_id_no'], data['p4_contact']]
+#     for ign in igns:
+#         if ign in ign_set:
+#             print("Duplicate IGN detected:", ign)
+#             return True
+#         else:
+#             ign_set.add(ign)
+#
+#     for ign in igns:
+#         cursor.execute("SELECT * FROM UniqueIGN WHERE ign = %s", (ign,))
+#         result = cursor.fetchone()
+#         if result:
+#             print("Duplicate ign detected:", ign)
+#             return True
+#
+#     return False
+
+def check_duplicate_ign(data):
+    # MySQL database configuration
+    DB_HOST = '217.21.94.103'
+    DB_NAME = 'u813060526_robowars'
+    DB_USER = 'u813060526_robowars'
+    DB_PASSWORD = '135@Hack'
+
+    # Connect to the MySQL database
+    conn = mysql.connector.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+    cursor = conn.cursor()
+    ign_set = set()
+    igns = [data['team_name'], data['leader_contact'], data['leader_email'], data['robot_drive'], ['p2_contact'], data['p2_email'], data['p3_contact'], data['p3_email'], data['p4_contact'], data['p4_email'], data['p5_contact'], data['p5_email']]
+    field_names = ['Team Name', 'Leader Contact', 'Leader Email', 'Robot Drive', 'P2 Contact', 'P2 Email', 'P3 Contact', 'P3 Email', 'P4 Contact', 'P4 Email', 'P5 Contact', 'P5 Email']
+    duplicate_fields = []
+
+    for i, ign in enumerate(igns):
+        if ign in ign_set:
+            print("Duplicate IGN detected at field", field_names[i], ":", ign)
+            duplicate_fields.append(field_names[i])
+        ign_set.add(ign)
+
+    for ign in igns:
+        cursor.execute("SELECT * FROM UniqueIGN WHERE ign = %s", (ign,))
+        result = cursor.fetchone()
+        if result:
+            print("Duplicate IGN detected:", ign)
+            return True, duplicate_fields, ign
+
+    return False, [], ''
+
+
+@app.route('/')
+def index():
+    return 'API is working'
+
+
 @app.route('/submit', methods=['POST'])
 def send_email():
-    if request.method == 'POST':
-        data = request.json
-        team_name = data.get('team_name')
-        college_name = data.get('college_name')
-        leader_name = data.get('leader_name')
-        leader_contact = data.get('leader_contact')
-        leader_email = data.get('leader_email')
-        robot_drive = data.get('robot_drive')
+    data = request.get_json()
+    token = generate_token()
 
-        # Extract details of other members
-        member_details = []
-        for i in range(2, 6):  # Assuming there are up to 4 team members
-            member_name = data.get(f'p{i}_name')
-            member_contact = data.get(f'p{i}_contact')
-            member_email = data.get(f'p{i}_email')
-            if member_name and member_contact and member_email:
-                member_details.append({
-                    'name': member_name,
-                    'contact': member_contact,
-                    'email': member_email
-                })
+    # uniqueemails = [data['leader_email'], data['p2_email'], data['p3_email'], data['p4_email']]
+    # uniqueigns = [data['leader_ign'], data['p2_ign'], data['p3_ign'], data['p4_ign']]
 
-        token = generate_token()
-        email = leader_email  # Assuming leader's email is used for verification
-        email_tokens[email] = token
+    # if check_duplicate_email(data):
+    #     return jsonify({'message': 'Duplicate email detected.'}), 400
 
-        # Construct authentication link with all required parameters
-        auth_link = generate_auth_link(token, team_name, college_name, leader_name, leader_contact, leader_email,
-                                       robot_drive, member_details)
-        subject = 'Authentication Link'
-        body = f'''
-                <html>
-                <head>
-                    <title>{subject}</title>
-                </head>
-                <body>
-                    <h2>{subject}</h2>
-                    <p>Click the button below to authenticate:</p>
-                    <a href="{auth_link}" >Authenticate</a>
-                </body>
-                </html>
-                '''
-
-        # Create yagmail SMTP client
-        yag = yagmail.SMTP(sender_email, app_password)
-
-        # Send the email
-        yag.send(to=email, subject=subject, contents=body)
-
-        return redirect(url_for('email_sent'))
+    result, duplicate_fields, duplicate_ign = check_duplicate_ign(data)
+    if result:
+        if duplicate_fields:
+            return jsonify({'message': f'Duplicate data found at {duplicate_fields}: {duplicate_ign}.'}), 400
+        else:
+            return jsonify({'message': f'Duplicate data found: {duplicate_ign}.'}), 400
 
 
-# Route to inform user that email has been sent
-@app.route('/email_sent')
-def email_sent():
-    return send_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'email_sent.html'))
+    email = data['leader_email']
+    email_tokens[email] = token
+
+    auth_link = generate_auth_link(token, data)
+    subject = 'Authentication Email for ROBOWARS Registration'
+    body = f'''
+            <html>
+            <head>
+                <title>{subject}</title>
+            </head>
+            <body>
+                <h2>Click on the link below to complete your registration:</h2>
+                <h2><a href="{auth_link}" >Click Here</a><h2>
+            </body>
+            </html>
+            '''
+
+    yag = yagmail.SMTP(sender_email, app_password)
+    yag.send(to=email, subject=subject, contents=body)
+
+    return jsonify({'message': 'Email sent successfully.'})
 
 
-# Route to handle verification
 @app.route('/verify/<token>', methods=['GET'])
 def verify(token):
-    if token:
-        # Check if the token exists in email_tokens
-        if token in email_tokens.values():
-            # Get the email associated with the token
-            email = [key for key, value in email_tokens.items() if value == token][0]
+    # MySQL database configuration
+    DB_HOST = '217.21.94.103'
+    DB_NAME = 'u813060526_robowars'
+    DB_USER = 'u813060526_robowars'
+    DB_PASSWORD = '135@Hack'
 
-            # Retrieve data from the query parameters
-            team_name = request.args.get('team_name')
-            college_name = request.args.get('college_name')
-            leader_name = request.args.get('leader_name')
-            leader_contact = request.args.get('leader_contact')
-            leader_email = request.args.get('leader_email')
-            robot_drive = request.args.get('robot_drive')
+    # Connect to the MySQL database
+    conn = mysql.connector.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+    cursor = conn.cursor()
+    if token in email_tokens.values():
+        emails = [key for key, value in email_tokens.items() if value == token][0]
+        data = request.args.to_dict()
+        # uniqueemails = [data['leader_email'], data['p2_email'], data['p3_email'], data['p4_email']]
+        uniqueigns = [data['team_name'], data['leader_contact'], data['leader_email'], data['robot_drive'], data['p2_contact'], data['p2_email'], data['p3_contact'], data['p3_email'], data['p4_contact'], data['p4_email'], data['p5_contact'], data['p5_email']]
 
-            # Check if all required parameters are present
-            if team_name and college_name and leader_name and leader_contact and leader_email and robot_drive:
-                # Append new data to Google Sheets
-                new_row = [team_name, college_name, leader_name, leader_contact, leader_email, robot_drive]
+        try:
+            for y in uniqueigns:
+                cursor.execute("INSERT INTO UniqueIGN (ign) VALUES (%s)", (y,))
+            conn.commit()
 
-                # Extract member details
-                for i in range(2, 6):  # Assuming there are up to 4 team members
-                    member_name = request.args.get(f'p{i}_name')
-                    member_contact = request.args.get(f'p{i}_contact')
-                    member_email = request.args.get(f'p{i}_email')
-                    if member_name and member_contact and member_email:
-                        new_row.extend([member_name, member_contact, member_email])
-                    else:
-                        new_row.extend(['', '', ''])  # Append empty strings if data is missing
+            # for x in uniqueemails:
+            #     cursor.execute("INSERT INTO UniqueEmails2 (email) VALUES (%s)", (x,))
+            # conn.commit()
 
-                # Append the row to the worksheet
-                worksheet.append_row(new_row)
+            cursor.execute("INSERT INTO Robowarsregistrations (team_name, college_name, leader_name, leader_contact, leader_email, robot_drive, p2_name, p2_contact, p2_email, p3_name, p3_contact, p3_email, p4_name, p4_contact, p4_email, p5_name, p5_contact, p5_email) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                           (data['team_name'], data['college_name'], data['leader_name'], data['leader_contact'], data['leader_email'], data['robot_drive'], data['p2_name'], data['p2_contact'], data['p2_email'], data['p3_name'], data['p3_contact'], data['p3_email'], data['p4_name'], data['p4_contact'], data['p4_email'], data['p5_name'], data['p5_contact'], data['p5_email']))
+            conn.commit()
 
-                # Remove token from dictionary after verification
-                del email_tokens[email]
-
-                return jsonify({'message': 'Authentication successful. Data stored into Google Sheets.'})
-            else:
-                return jsonify({'message': 'Missing parameters in the verification link.'}), 400
-        else:
-            return jsonify({'message': 'Invalid or expired verification link.'}), 400
+            del email_tokens[emails]
+            return 'Authentication successful. You are now registered for ROBOWARS in gameathon.'
+        except mysql.connector.Error as err:
+            print("Error inserting data:", err)
+            conn.rollback()
+            error_message = f"Error inserting data into database: {err}"
+            return jsonify({'message': error_message}), 500
     else:
-        return jsonify({'message': 'No token provided.'}), 400
+        return jsonify({'message': 'Invalid or expired verification link.'}), 400
