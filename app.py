@@ -10,42 +10,6 @@ CORS(app)
 
 app.secret_key = 'inderkiran@24'
 
-# MySQL database configuration
-DB_HOST = '217.21.94.103'
-DB_NAME = 'u813060526_robowars'
-DB_USER = 'u813060526_robowars'
-DB_PASSWORD = '135@Hack'
-
-# Connect to the MySQL database
-conn = mysql.connector.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
-cursor = conn.cursor()
-
-cursor.execute("CREATE TABLE IF NOT EXISTS UniqueIGN (ign VARCHAR(255) UNIQUE)")
-conn.commit()
-# cursor.execute("DROP TABLE IF EXISTS UniqueIGN")
-# conn.commit()
-cursor.execute('''CREATE TABLE IF NOT EXISTS Robowarsregistrations (
-    team_name VARCHAR(255) PRIMARY KEY,
-    college_name VARCHAR(255),
-    leader_name VARCHAR(255),
-    leader_contact VARCHAR(255) UNIQUE,
-    leader_email VARCHAR(255) UNIQUE,
-    robot_drive VARCHAR(255) UNIQUE,
-    p2_name VARCHAR(255),
-    p2_contact VARCHAR(255) UNIQUE,
-    p2_email VARCHAR(255) UNIQUE,
-    p3_name VARCHAR(255),
-    p3_contact VARCHAR(255) UNIQUE,
-    p3_email VARCHAR(255) UNIQUE,
-    p4_name VARCHAR(255),
-    p4_contact VARCHAR(255) UNIQUE,
-    p4_email VARCHAR(255) UNIQUE,
-    p5_name VARCHAR(255),
-    p5_contact VARCHAR(255) UNIQUE,
-    p5_email VARCHAR(255) UNIQUE
-);
-''')
-conn.commit()
 
 # Email configuration
 sender_email = 'hackoverflow@cumail.in'
